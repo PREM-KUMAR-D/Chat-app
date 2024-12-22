@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user-model');
 const { generateToken } = require('../lib/util');
+const {cloudinary} = require('../lib/cloudinary');
 
 
 exports.signUp = async (req, res, next) => {
@@ -108,10 +109,40 @@ exports.logout = (req, res, next) => {
             maxAge:0
         })
         res.status(200).json({
-            message: "Logged Out Successfully"
+            message: "Logged Out Successfully!"
         })
 
     } catch (error) {
         console.log("Error occured ", error.message);
+    }
+}
+
+exports.updateProfile = async (req,res,next)=>{
+    try {
+        const {profilePic }= req.body;
+        
+        const userId =req.user._id;
+
+        if(!profilePic){
+            return res.status(400).json({
+                message: "Profile pic is required"
+            });
+        }
+
+        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
+        const updateUser = await User.findByIdAndUpdate(userId,{
+            profilePic: uploadResponse.secure_url
+        },{
+            new: true
+        })
+
+        res.status(200).json(updateUser)
+
+    } catch (error) {
+        console.log("Error occured ", error.message);
+        res.status(500).json({
+            message: "Internal server error"
+        })
     }
 }

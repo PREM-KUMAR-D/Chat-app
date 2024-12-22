@@ -1,16 +1,20 @@
 const express = require("express");
 const dotenv = require('dotenv');
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 const db = require('./lib/db');
 const authRoutes = require('./routes/auth-routes');
-const bodyParser = require("body-parser");
 
 dotenv.config();
 
 const PORT = process.env.PORT;
 
 const app = express();
+
 app.use(bodyParser.json());
+
+app.use(cookieParser());
 
 
 

@@ -5,16 +5,16 @@ const { generateToken } = require('../lib/util');
 
 exports.signUp = async (req, res, next) => {
     try {
-        const {fullName , email, password} = req.body;
+        const { fullName, email, password } = req.body;
 
-        if(!fullName || !email || !password){
+        if (!fullName || !email || !password) {
             return res.status(400).json({
                 message: "Please provide values for all the fields"
             })
         }
 
 
-        if(password.length < 6){
+        if (password.length < 6) {
             return res.status(400).json({
                 message: "Password must be at least 6 Characters"
             });
@@ -24,17 +24,17 @@ exports.signUp = async (req, res, next) => {
             email
         });
 
-        if(user){
+        if (user) {
             return res.status(400).json({
                 message: "User already exists! Login with existing account"
             });
         }
-        
+
 
         const salt = await bcrypt.genSalt(10);
 
-        const hashedPass = await bcrypt.hash(password,salt);
-        
+        const hashedPass = await bcrypt.hash(password, salt);
+
 
         const newUser = new User({
             fullName,
@@ -42,9 +42,9 @@ exports.signUp = async (req, res, next) => {
             password: hashedPass,
         });
 
-        if(newUser){
+        if (newUser) {
 
-            generateToken(newUser._id,res);
+            generateToken(newUser._id, res);
             await newUser.save();
 
             res.status(201).json({
@@ -56,7 +56,7 @@ exports.signUp = async (req, res, next) => {
             })
 
 
-        }else{
+        } else {
             res.status(400).json({
                 message: "Invalid User Data"
             })
@@ -67,10 +67,51 @@ exports.signUp = async (req, res, next) => {
     }
 }
 
-exports.login =  (req, res, next) => {
-    return res.status(200).send("working lol...")
+exports.login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid Credentials"
+            })
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordCorrect){
+            return res.status(400).json({
+                message: "Invalid Credentials"
+            })
+        }
+        
+        generateToken(user._id,res);
+
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+
+        })
+
+    } catch (error) {
+        console.log("Error occured ", error.message);
+    }
 }
 
-exports.logout =  (req, res, next) => {
-    return res.status(200).send("working lol...")
+exports.logout = (req, res, next) => {
+    try {
+        res.cookie("jwt","", {
+            maxAge:0
+        })
+        res.status(200).json({
+            message: "Logged Out Successfully"
+        })
+
+    } catch (error) {
+        console.log("Error occured ", error.message);
+    }
 }

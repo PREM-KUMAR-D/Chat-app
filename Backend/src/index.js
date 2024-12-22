@@ -3,12 +3,16 @@ const dotenv = require('dotenv');
 
 const db = require('./lib/db');
 const authRoutes = require('./routes/auth-routes');
+const bodyParser = require("body-parser");
 
-
-const app = express();
 dotenv.config();
 
 const PORT = process.env.PORT;
+
+const app = express();
+app.use(bodyParser.json());
+
+
 
 app.use("/api/auth", authRoutes )
 

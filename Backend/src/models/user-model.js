@@ -2,6 +2,7 @@ const monogoose = require('mongoose');
 
 const userSchema =  new monogoose.Schema(
     {
+        
         email: {
             type: String ,
             required: true,

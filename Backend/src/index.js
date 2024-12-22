@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 const db = require('./lib/db');
 const authRoutes = require('./routes/auth-routes');
+const messageRoutes = require('./routes/message-routes');
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ app.use(cookieParser());
 
 
 
-app.use("/api/auth", authRoutes )
+app.use("/api/auth", authRoutes );
+app.use("/api/message", messageRoutes );
 
 
 
